@@ -16,3 +16,5 @@ Format and rules: [0001](0001-record-architecture-decisions.md). Never edit an a
 | 10 | [Guardrails as policy-as-code against excessive agency](0010-guardrails-as-policy-as-code.md) | Accepted |
 | 11 | [A pytest eval harness with results in Langfuse](0011-own-eval-harness.md) | Accepted |
 | 12 | [A hard monthly cap on paid LLM API spend](0012-llm-api-budget-cap.md) | Accepted |
+| 13 | [OrbStack as the local container runtime](0013-orbstack-container-runtime.md) | Accepted |
+| 14 | [Qwen3 14B as the default local model](0014-qwen3-14b-local-model.md) | Accepted |

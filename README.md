@@ -43,6 +43,26 @@ The system has two agent modes over one event platform:
 
 There are no fixed dates: each milestone is done when it works and its decisions are recorded.
 
+## Develop
+
+Prerequisites: a Docker runtime ([OrbStack](https://orbstack.dev) is used here, any works; [ADR 0013](docs/adr/0013-orbstack-container-runtime.md)), [`uv`](https://docs.astral.sh/uv/), and [Ollama](https://ollama.com) with the default local model ([ADR 0014](docs/adr/0014-qwen3-14b-local-model.md)):
+
+```sh
+ollama pull qwen3:14b
+cp .env.example .env   # then fill in
+make install           # Python 3.12 and dependencies into .venv
+make lint test
+```
+
+| Target | Does |
+|---|---|
+| `make install` | Install Python and dependencies |
+| `make lint` / `make fmt` | Check / fix lint and formatting (ruff) |
+| `make test` | Unit tests, no LLM calls |
+| `make up` / `make down` | Start / stop the local stack (from M1 step 2) |
+| `make demo` | End-to-end demo (from M1 step 9) |
+| `make eval` | Agent eval suite (from M1 step 8) |
+
 ## Decisions
 
 Every significant decision is recorded as an Architecture Decision Record in [`docs/adr/`](docs/adr/). The scope and the reasoning behind it are in [`docs/scope.md`](docs/scope.md).

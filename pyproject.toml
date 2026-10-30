@@ -1,0 +1,30 @@
+[project]
+name = "agentic-mesh"
+version = "0.1.0"
+description = "AI agents over real-time event streams, grounded in a semantic data mesh."
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.2.0",
+    "ruff>=0.17.3",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "eval: agent eval cases; slow and may call LLMs (run with `make eval`)",
+]
