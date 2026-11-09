@@ -34,4 +34,5 @@ Conventions: MIT licence, Python managed with `uv`, CI on GitHub Actions running
 ## Later
 
 - Graphify (codebase knowledge graph) around M3, with a measured before/after token comparison.
-- A Confluent Cloud deployment profile.
+- A Confluent Cloud deployment profile, with Tableflow replacing the local materialization job ([ADR 0018](adr/0018-kafka-topics-first-iceberg-materialization.md)).
+- A measured comparison of three topic-to-Iceberg materializers on the same topics: the Flink SQL job, Iceberg's Kafka Connect sink, and Tableflow.

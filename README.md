@@ -18,9 +18,11 @@ The system has two agent modes over one event platform:
 ## Target architecture
 
 ```
- synthetic e-commerce events ──► Kafka ──► Flink SQL ──► Iceberg (MinIO)
-                                   │          │
-                                   │          └─► anomaly.detected ──► Temporal workflow ──► human approval
+ synthetic e-commerce events ──► Kafka topics ◄──► Flink SQL jobs (metrics, anomalies: written back to Kafka)
+                                   │
+                                   ├─► materialization job ──► Iceberg tables (RustFS)   [Tableflow in the cloud]
+                                   │
+                                   ├─► anomaly.detected ──► Temporal workflow ──► human approval
                                    │                                          │
                                    ▼                                          ▼
                      semantic mesh: data products with descriptors   agent (Claude / OpenAI / local)

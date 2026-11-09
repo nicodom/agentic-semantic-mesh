@@ -18,3 +18,7 @@ Format and rules: [0001](0001-record-architecture-decisions.md). Never edit an a
 | 12 | [A hard monthly cap on paid LLM API spend](0012-llm-api-budget-cap.md) | Accepted |
 | 13 | [OrbStack as the local container runtime](0013-orbstack-container-runtime.md) | Accepted |
 | 14 | [Qwen3 14B as the default local model](0014-qwen3-14b-local-model.md) | Accepted |
+| 15 | [Apache Kafka in KRaft mode as the event log](0015-apache-kafka-kraft.md) | Accepted |
+| 16 | [Apache's reference Iceberg REST catalog for M1](0016-reference-iceberg-rest-catalog.md) | Accepted |
+| 17 | [RustFS as the local S3-compatible object store](0017-rustfs-object-storage.md) | Accepted |
+| 18 | [Flink jobs write to Kafka topics; a separate job materializes topics into Iceberg](0018-kafka-topics-first-iceberg-materialization.md) | Accepted |
