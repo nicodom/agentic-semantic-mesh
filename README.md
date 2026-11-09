@@ -54,16 +54,28 @@ ollama pull qwen3:14b
 cp .env.example .env   # then fill in
 make install           # Python 3.12 and dependencies into .venv
 make lint test
+make up smoke          # start the local stack, then check data flows through it
 ```
 
 | Target | Does |
 |---|---|
 | `make install` | Install Python and dependencies |
 | `make lint` / `make fmt` | Check / fix lint and formatting (ruff) |
-| `make test` | Unit tests, no LLM calls |
-| `make up` / `make down` | Start / stop the local stack (from M1 step 2) |
+| `make test` | Unit tests: no LLM calls, no running stack |
+| `make up` / `make down` | Start the local stack and wait until healthy / stop it, keeping data |
+| `make clean` | Stop the stack and delete its data |
+| `make smoke` | Smoke tests against the running stack: Kafka, Iceberg, and topic → Flink → Iceberg |
 | `make demo` | End-to-end demo (from M1 step 9) |
 | `make eval` | Agent eval suite (from M1 step 8) |
+
+The local stack ([`compose.yaml`](compose.yaml)) uses about 2 GB of memory:
+
+| Service | Host port | Notes |
+|---|---|---|
+| Kafka 4.4 (KRaft) | `localhost:9092` | [ADR 0015](docs/adr/0015-apache-kafka-kraft.md) |
+| Flink 2.2 | UI on [localhost:8081](http://localhost:8081) | SQL client: `docker compose exec jobmanager ./bin/sql-client.sh` |
+| Iceberg REST catalog | `localhost:8181` | [ADR 0016](docs/adr/0016-reference-iceberg-rest-catalog.md) |
+| RustFS (S3) | API `localhost:9000`, console [localhost:9001](http://localhost:9001) | Login `asm-local` / `asm-local-secret` (local defaults); [ADR 0017](docs/adr/0017-rustfs-object-storage.md) |
 
 ## Decisions
 

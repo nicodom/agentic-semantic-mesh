@@ -12,6 +12,8 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "confluent-kafka>=2.16.1",
+    "pyiceberg[pyarrow]>=0.12.0",
     "pytest>=9.2.0",
     "ruff>=0.17.3",
 ]
@@ -27,4 +29,5 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 testpaths = ["tests"]
 markers = [
     "eval: agent eval cases; slow and may call LLMs (run with `make eval`)",
+    "integration: smoke tests against the local stack (run `make up`, then `make smoke`)",
 ]
