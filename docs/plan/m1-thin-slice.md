@@ -25,10 +25,10 @@ Each step ends with something runnable and a commit.
 
 ### 2. Streaming platform in Compose
 
-- Kafka (single broker, KRaft) → **ADR** if choosing an alternative (e.g. Redpanda)
-- Flink (JobManager, TaskManager, SQL client)
-- MinIO and an Iceberg REST catalog
-- Smoke test: produce a message, read it back; create an Iceberg table, query it
+- Kafka (single broker, KRaft) → [ADR 0015](../adr/0015-apache-kafka-kraft.md)
+- Flink 2.2 (JobManager, TaskManager, SQL client), the newest version the Kafka connector supports → [ADR 0016](../adr/0016-reference-iceberg-rest-catalog.md)
+- RustFS (S3-compatible; MinIO is no longer maintained) → [ADR 0017](../adr/0017-rustfs-object-storage.md), and the reference Iceberg REST catalog → [ADR 0016](../adr/0016-reference-iceberg-rest-catalog.md)
+- Smoke tests: produce a message, read it back; create an Iceberg table, query it; a Flink SQL job copies a Kafka topic into an Iceberg table (the first version of the materialization job, [ADR 0018](../adr/0018-kafka-topics-first-iceberg-materialization.md))
 
 ### 3. Event generator with ground truth
 
@@ -40,7 +40,8 @@ Each step ends with something runnable and a commit.
 
 - Kafka source tables for each event type
 - Tumbling windows: orders per minute, checkout conversion (5 min), payment failure rate by provider (5 min)
-- Sinks: raw events and windowed metrics to Iceberg; metrics also to a Kafka topic
+- Sinks: Flink jobs write windowed metrics only to Kafka topics
+- A separate materialization job copies raw-event and metric topics into Iceberg tables, the part Tableflow replaces in a Confluent Cloud profile ([ADR 0018](../adr/0018-kafka-topics-first-iceberg-materialization.md))
 
 ### 5. Provider interface
 
