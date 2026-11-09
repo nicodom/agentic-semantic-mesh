@@ -1,6 +1,6 @@
 # 10. Guardrails as policy-as-code against excessive agency
 
-Status: Accepted (2026-10-27)
+Status: Superseded by [19](0019-risk-tiered-autonomy.md) (2026-11-09)
 
 ## Context
 

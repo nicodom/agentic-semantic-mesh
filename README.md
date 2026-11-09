@@ -13,7 +13,7 @@ The answer this project tests is that agents need more than connectivity. Giving
 The system has two agent modes over one event platform:
 
 - **Assistant:** answers questions about what is happening in the business right now ("why did checkout conversion drop in the last 10 minutes?").
-- **Agentic workflow:** when the stream processor detects an anomaly, an agent plans an investigation, gathers evidence through tools, has its diagnosis critiqued by a second model, and proposes an action. Nothing runs until a human approves it.
+- **Agentic workflow:** when the stream processor detects an anomaly, an agent plans an investigation, gathers evidence through tools, has its diagnosis critiqued by a second model, and proposes an action. A policy outside the model decides what happens next: low-risk, reversible actions within limits run automatically and are reported; high-impact actions wait for a human to approve them.
 
 ## Target architecture
 
@@ -22,7 +22,8 @@ The system has two agent modes over one event platform:
                                    │
                                    ├─► materialization job ──► Iceberg tables (RustFS)   [Tableflow in the cloud]
                                    │
-                                   ├─► anomaly.detected ──► Temporal workflow ──► human approval
+                                   ├─► anomaly.detected ──► Temporal workflow ──► policy: low risk → runs automatically
+                                   │                                          │           high impact → human approval
                                    │                                          │
                                    ▼                                          ▼
                      semantic mesh: data products with descriptors   agent (Claude / OpenAI / local)
@@ -40,7 +41,7 @@ The system has two agent modes over one event platform:
 |---|---|---|
 | **M1** | Thin slice | Events → Kafka → Flink SQL → Iceberg; an agent answers a fixed set of questions through tool calls on three LLM providers; scored evals with token cost per answer |
 | **M2** | Semantic mesh | Streams and tables become data products with descriptors; an MCP server exposes data products, not raw topics; the agent finds data by meaning; Neo4j holds the semantic graph |
-| **M3** | Agentic workflow + guardrails | Anomaly → investigation → proposed action → human approval on Temporal; excessive-agency guardrails as policy-as-code, each proven by eval cases |
+| **M3** | Agentic workflow + guardrails | Anomaly → investigation → proposed action on Temporal; policy decides whether the action runs automatically (low risk, within limits) or waits for human approval (high impact); excessive-agency guardrails as policy-as-code, each tier boundary proven by eval cases |
 | **M4** | Write-up | Long-form write-up and a meetup talk |
 
 There are no fixed dates: each milestone is done when it works and its decisions are recorded.

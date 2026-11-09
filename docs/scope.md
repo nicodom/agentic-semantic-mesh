@@ -14,12 +14,12 @@ A project good enough to explain in depth: a working system, the decisions behin
 | Infrastructure | Local-first Docker Compose; anyone can run the demo | [0003](adr/0003-local-first-docker-compose.md) |
 | Data | Synthetic e-commerce events from a generator with known ground truth; a real public stream later as a second source | [0004](adr/0004-synthetic-ecommerce-domain.md) |
 | Models | Claude, OpenAI and a local open model behind one provider interface | [0005](adr/0005-multi-provider-llm-interface.md) |
-| Agent modes | Conversational assistant + anomaly-triggered workflow with human approval | [0006](adr/0006-temporal-for-agentic-workflow.md) |
+| Agent modes | Conversational assistant + anomaly-triggered workflow; low-risk actions run automatically within policy, high-impact ones need human approval | [0006](adr/0006-temporal-for-agentic-workflow.md), [0019](adr/0019-risk-tiered-autonomy.md) |
 | Orchestration | Temporal; reasoning inside each step is plain SDK calls, no agent framework | [0006](adr/0006-temporal-for-agentic-workflow.md) |
 | Semantics | Semantic mesh from M2: data products with descriptors, exposed through MCP | [0007](adr/0007-semantic-mesh-of-data-products.md) |
 | Stores | Postgres + pgvector for retrieval; Neo4j for the semantic graph | [0008](adr/0008-postgres-pgvector-and-neo4j.md) |
 | Observability | OpenTelemetry (GenAI conventions) + self-hosted Langfuse | [0009](adr/0009-opentelemetry-and-langfuse.md) |
-| Guardrails | Policy-as-code against excessive agency (OWASP LLM06), enforced at the MCP layer, plus the approval gate | [0010](adr/0010-guardrails-as-policy-as-code.md) |
+| Guardrails | Policy-as-code against excessive agency (OWASP LLM06), enforced at the MCP layer; risk tiers decide between automatic execution and human approval | [0019](adr/0019-risk-tiered-autonomy.md) (supersedes [0010](adr/0010-guardrails-as-policy-as-code.md)) |
 | Evals | Own pytest harness; ground truth from the generator; results in Langfuse | [0011](adr/0011-own-eval-harness.md) |
 | Budget | €50/month hard cap on paid LLM APIs | [0012](adr/0012-llm-api-budget-cap.md) |
 
