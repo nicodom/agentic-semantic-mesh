@@ -65,7 +65,10 @@ make up smoke          # start the local stack, then check data flows through it
 | `make test` | Unit tests: no LLM calls, no running stack |
 | `make up` / `make down` | Start the local stack and wait until healthy / stop it, keeping data |
 | `make clean` | Stop the stack and delete its data |
-| `make smoke` | Smoke tests against the running stack: Kafka, Iceberg, and topic → Flink → Iceberg |
+| `make smoke` | Smoke tests against the running stack: Kafka, Iceberg, topic → Flink → Iceberg, and the event generator |
+| `make backfill` | Generate the last 2 hours of shop events into Kafka (seed 42), with a payment-provider outage halfway |
+| `make generate` | Generate events live until Ctrl-C, with an outage after 5 minutes |
+| `make peek TOPIC=…` | Show the latest events of a topic, decoded from Avro |
 | `make demo` | End-to-end demo (from M1 step 9) |
 | `make eval` | Agent eval suite (from M1 step 8) |
 
@@ -74,9 +77,27 @@ The local stack ([`compose.yaml`](compose.yaml)) uses about 2 GB of memory:
 | Service | Host port | Notes |
 |---|---|---|
 | Kafka 4.4 (KRaft) | `localhost:9092` | [ADR 0015](docs/adr/0015-apache-kafka-kraft.md) |
+| Schema Registry | `localhost:8085` | Avro schemas of every topic; [ADR 0020](docs/adr/0020-avro-with-confluent-schema-registry.md) |
 | Flink 2.2 | UI on [localhost:8081](http://localhost:8081) | SQL client: `docker compose exec jobmanager ./bin/sql-client.sh` |
 | Iceberg REST catalog | `localhost:8181` | [ADR 0016](docs/adr/0016-reference-iceberg-rest-catalog.md) |
 | RustFS (S3) | API `localhost:9000`, console [localhost:9001](http://localhost:9001) | Login `asm-local` / `asm-local-secret` (local defaults); [ADR 0017](docs/adr/0017-rustfs-object-storage.md) |
+
+### Events and ground truth
+
+The generator ([ADR 0021](docs/adr/0021-python-event-generator-with-event-time.md)) simulates shopper sessions and writes one topic per event type, as Avro, with the event time as the Kafka timestamp:
+
+| Topic | Key | What happened |
+|---|---|---|
+| `shop.cart_updated` | `session_id` | Units of a product added to or removed from a cart |
+| `shop.checkout_started` | `session_id` | Checkout started; the order is created as pending |
+| `shop.payment_attempted` | `session_id` | One payment attempt; after a failure the customer may retry once with another provider |
+| `shop.order_placed` | `order_id` | Order paid and placed |
+| `shop.inventory_changed` | `sku` | Stock changed by an order, a return or a restock |
+| `shop.return_requested` | `order_id` | Return requested for a product of an order |
+
+A session is one customer's visit, from the first cart change to checkout, with at most one order. Keys are partitioning keys, not primary keys: all events of a session share a partition and stay in order. The topics are append-only. The schemas, with a description of every field, are in [`src/agentic_mesh/generator/schemas/`](src/agentic_mesh/generator/schemas/).
+
+Each run writes its ground truth to `data/local/ground-truth/` as JSONL: the run's parameters and scenarios, then exact counts per epoch-aligned window (orders per minute; checkouts, orders, conversion and abandonment per 5 minutes; payment attempts, failures and retries by provider per 5 minutes). The evals and the Flink jobs are checked against these numbers. A backfill with the same `--seed` and `--end` produces identical events.
 
 ## Decisions
 

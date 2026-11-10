@@ -17,6 +17,29 @@ def events() -> list[Event]:
     return list(simulate(42, START, END, scenarios=(OUTAGE,)))
 
 
+@pytest.fixture(scope="module")
+def complete(events: list[Event]) -> list[Event]:
+    """Events of sessions fully inside the range.
+
+    Sessions overlapping either edge are cut: those from the warm-up appear without their cart,
+    those near the end without their order. Flink sees the same; causality is checked on the rest.
+    """
+    first_cart: dict[str, int] = {}
+    for e in by(events, "cart_updated"):
+        first_cart.setdefault(e.value["session_id"], e.time_ms)
+    sessions = {s for s, t in first_cart.items() if START <= t < END - 15 * MINUTE}
+    orders = {
+        e.value["order_id"]
+        for e in by(events, "checkout_started")
+        if e.value["session_id"] in sessions
+    }
+    return [
+        e
+        for e in events
+        if e.value.get("session_id") in sessions or e.value.get("order_id") in orders
+    ]
+
+
 def by(events: list[Event], type_: str) -> list[Event]:
     return [e for e in events if e.type == type_]
 
@@ -60,7 +83,8 @@ def test_event_ids_are_unique(events: list[Event]) -> None:
     assert len(ids) == len(set(ids))
 
 
-def test_funnel_causality(events: list[Event]) -> None:
+def test_funnel_causality(complete: list[Event]) -> None:
+    events = complete
     carts = {e.value["session_id"]: e.time_ms for e in reversed(by(events, "cart_updated"))}
     checkouts = {e.value["order_id"]: e for e in by(events, "checkout_started")}
     attempts: defaultdict[str, list[Event]] = defaultdict(list)
@@ -81,7 +105,8 @@ def test_funnel_causality(events: list[Event]) -> None:
         assert order.value["total"] == checkouts[order.value["order_id"]].value["cart_value"]
 
 
-def test_retry_rules(events: list[Event]) -> None:
+def test_retry_rules(complete: list[Event]) -> None:
+    events = complete
     attempts: defaultdict[str, list[Event]] = defaultdict(list)
     for e in by(events, "payment_attempted"):
         attempts[e.value["order_id"]].append(e)
@@ -130,7 +155,17 @@ def test_stock_never_negative_and_consistent(events: list[Event]) -> None:
     }
 
 
-def test_returns_refer_to_earlier_orders(events: list[Event]) -> None:
+def test_returns_refer_to_earlier_orders(complete: list[Event]) -> None:
+    events = complete
     orders = {e.value["order_id"]: e for e in by(events, "order_placed")}
     for r in by(events, "return_requested"):
         assert orders[r.value["order_id"]].time_ms < r.time_ms
+
+
+def test_traffic_is_steady_from_the_first_minute(events: list[Event]) -> None:
+    # Thanks to the warm-up, the first 10 minutes look like any other 10 before the outage.
+    def orders(minutes_from: int) -> int:
+        lo, hi = START + minutes_from * MINUTE, START + (minutes_from + 10) * MINUTE
+        return sum(1 for e in by(events, "order_placed") if lo <= e.time_ms < hi)
+
+    assert orders(0) > 0.7 * orders(30)

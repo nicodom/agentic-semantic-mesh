@@ -8,6 +8,10 @@ dependencies = [
     "confluent-kafka[avro,schemaregistry]>=2.16.1",
 ]
 
+[project.scripts]
+asm-generate = "agentic_mesh.generator.cli:main"
+asm-peek = "agentic_mesh.generator.peek:main"
+
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14.0"]
 build-backend = "uv_build"

@@ -25,6 +25,9 @@ PROVIDERS = ("stripe", "adyen", "paypal")
 CENT = Decimal("0.01")  # money has scale 2, as in the Avro schemas
 SECOND = 1_000
 MINUTE = 60 * SECOND
+# Sessions start arriving this long before `start_ms`, so traffic is in steady state from the
+# first emitted minute instead of ramping up from an empty shop. Longer than any checkout funnel.
+WARMUP_MS = 15 * MINUTE
 
 
 @dataclass(frozen=True)
@@ -124,6 +127,7 @@ def simulate(
     """Yield events with `start_ms <= time_ms < end_ms`, in event-time order.
 
     With `end_ms=None` the stream never ends (live mode); the caller decides when to stop.
+    Events before `start_ms` (the warm-up) are simulated but not emitted.
     """
     cfg = config or Config()
     arrivals = random.Random(f"{seed}:arrivals")
@@ -166,7 +170,7 @@ def simulate(
         )
 
     index = 0
-    next_arrival = start_ms + round(arrivals.expovariate(rate_per_ms))
+    next_arrival = start_ms - WARMUP_MS + round(arrivals.expovariate(rate_per_ms))
     arrivals_open = True
     while True:
         # A session's events never precede its arrival, so once the next arrival is later than
@@ -184,7 +188,10 @@ def simulate(
         time_ms, _, item = heapq.heappop(heap)
         if end_ms is not None and time_ms >= end_ms:
             return  # everything still pending is later
-        yield apply(item) if isinstance(item, _StockChange) else item
+        if isinstance(item, _StockChange):
+            item = apply(item)  # also during warm-up, so stock levels carry over
+        if time_ms >= start_ms:
+            yield item
 
 
 def _session(

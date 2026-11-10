@@ -1,4 +1,6 @@
-.PHONY: install lint fmt test smoke up down clean demo eval
+.PHONY: install lint fmt test smoke up down clean backfill generate peek demo eval
+
+TOPIC ?= shop.payment_attempted
 
 install:  ## Install Python and dependencies into .venv
 	uv sync
@@ -25,6 +27,15 @@ down:  ## Stop the local stack (data is kept)
 
 clean:  ## Stop the local stack and delete its data volumes
 	docker compose down -v
+
+backfill:  ## Generate the last 2 hours of events into Kafka, with a payment outage halfway
+	uv run asm-generate backfill --hours 2 --seed 42 --scenario payment-outage
+
+generate:  ## Generate live events until Ctrl-C, with a payment outage after 5 minutes
+	uv run asm-generate live --scenario payment-outage
+
+peek:  ## Show the latest events of a topic, decoded: make peek TOPIC=shop.order_placed
+	uv run asm-peek $(TOPIC) --tail -n 2
 
 demo:  ## Run the end-to-end demo
 	@echo "not implemented yet (M1 step 9)"; exit 1
