@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "PaymentAttempted",
+  "namespace": "agentic_mesh.shop",
+  "doc": "One attempt to pay for an order. After a failure the customer may retry with a different provider; the full history of an order is its attempts sorted by `attempt`.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "session_id", "type": "string", "doc": "A customer's shopping session, from the first cart change to checkout; at most one order per session."},
+    {"name": "order_id", "type": "string"},
+    {"name": "attempt", "type": "int", "doc": "1 for the first attempt, 2 for the first retry, and so on."},
+    {"name": "provider", "type": {"type": "enum", "name": "PaymentProvider", "symbols": ["stripe", "adyen", "paypal"]}},
+    {"name": "amount", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}, "doc": "Amount charged, EUR."},
+    {"name": "status", "type": {"type": "enum", "name": "PaymentStatus", "symbols": ["succeeded", "failed"]}},
+    {"name": "failure_reason", "type": ["null", {"type": "enum", "name": "PaymentFailureReason", "symbols": ["declined", "timeout", "provider_error"]}], "default": null, "doc": "Set only when status is failed."}
+  ]
+}

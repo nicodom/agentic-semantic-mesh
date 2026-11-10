@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "ReturnRequested",
+  "namespace": "agentic_mesh.shop",
+  "doc": "A customer asked to return the units of one product from an order.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "order_id", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "sku", "type": "string"},
+    {"name": "quantity", "type": "int", "doc": "Units to return."},
+    {"name": "reason", "type": {"type": "enum", "name": "ReturnReason", "symbols": ["damaged", "wrong_item", "not_as_described", "changed_mind"]}}
+  ]
+}

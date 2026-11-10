@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "SkuKey",
+  "namespace": "agentic_mesh.shop",
+  "doc": "Kafka record key for events of one product. A partitioning key, not a primary key.",
+  "fields": [
+    {"name": "sku", "type": "string", "doc": "Stock keeping unit: the product identifier."}
+  ]
+}

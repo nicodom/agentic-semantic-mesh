@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "SessionKey",
+  "namespace": "agentic_mesh.shop",
+  "doc": "Kafka record key for events of one shopping session. A partitioning key, not a primary key: all events of a session share it, so they land in one partition, in order.",
+  "fields": [
+    {"name": "session_id", "type": "string", "doc": "A customer's shopping session, from the first cart change to checkout; at most one order per session."}
+  ]
+}

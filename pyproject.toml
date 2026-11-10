@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "AI agents over real-time event streams, grounded in a semantic data mesh."
 license = "MIT"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "confluent-kafka[avro,schemaregistry]>=2.16.1",
+]
 
 [build-system]
 requires = ["uv_build>=0.13.6,<0.14.0"]
@@ -12,7 +14,6 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "confluent-kafka>=2.16.1",
     "pyiceberg[pyarrow]>=0.12.0",
     "pytest>=9.2.0",
     "ruff>=0.17.3",

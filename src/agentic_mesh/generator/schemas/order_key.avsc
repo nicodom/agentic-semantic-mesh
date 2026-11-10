@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "OrderKey",
+  "namespace": "agentic_mesh.shop",
+  "doc": "Kafka record key for events of one order. A partitioning key, not a primary key.",
+  "fields": [
+    {"name": "order_id", "type": "string", "doc": "Order identifier, created (pending) when checkout starts."}
+  ]
+}
