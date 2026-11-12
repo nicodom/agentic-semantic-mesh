@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "CartUpdated",
+  "namespace": "agentic_mesh.shop",
+  "doc": "A customer added or removed units of one product in their cart.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "session_id", "type": "string", "doc": "A customer's shopping session, from the first cart change to checkout; at most one order per session."},
+    {"name": "customer_id", "type": "string"},
+    {"name": "sku", "type": "string"},
+    {"name": "quantity_delta", "type": "int", "doc": "Units added (positive) or removed (negative)."},
+    {"name": "unit_price", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}, "doc": "Price of one unit, EUR."}
+  ]
+}

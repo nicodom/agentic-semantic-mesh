@@ -23,3 +23,5 @@ Format and rules: [0001](0001-record-architecture-decisions.md). Never edit an a
 | 17 | [RustFS as the local S3-compatible object store](0017-rustfs-object-storage.md) | Accepted |
 | 18 | [Flink jobs write to Kafka topics; a separate job materializes topics into Iceberg](0018-kafka-topics-first-iceberg-materialization.md) | Accepted |
 | 19 | [Risk-tiered autonomy: policy decides which agent actions run automatically](0019-risk-tiered-autonomy.md) | Accepted |
+| 20 | [Avro with Confluent Schema Registry for event serialization](0020-avro-with-confluent-schema-registry.md) | Accepted |
+| 21 | [A custom Python event generator with event time, and live and backfill modes](0021-python-event-generator-with-event-time.md) | Accepted |

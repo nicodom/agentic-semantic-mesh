@@ -6,6 +6,7 @@ import pytest
 from pyiceberg.catalog import Catalog, load_catalog
 
 KAFKA_BOOTSTRAP = os.environ.get("KAFKA_BOOTSTRAP") or "localhost:9092"
+SCHEMA_REGISTRY_URL = os.environ.get("SCHEMA_REGISTRY_URL") or "http://localhost:8085"
 
 
 @pytest.fixture(scope="session")

@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "OrderPlaced",
+  "namespace": "agentic_mesh.shop",
+  "doc": "An order was paid and placed.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "order_id", "type": "string"},
+    {"name": "session_id", "type": "string", "doc": "A customer's shopping session, from the first cart change to checkout; at most one order per session."},
+    {"name": "customer_id", "type": "string"},
+    {"name": "total", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}, "doc": "Order total, EUR."},
+    {"name": "item_count", "type": "int", "doc": "Total units in the order."},
+    {"name": "provider", "type": {"type": "enum", "name": "PaymentProvider", "symbols": ["stripe", "adyen", "paypal"]}, "doc": "The provider whose payment succeeded."},
+    {"name": "payment_attempts", "type": "int", "doc": "How many attempts it took to pay; 1 means no retry."}
+  ]
+}

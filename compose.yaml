@@ -1,10 +1,11 @@
-# Local streaming platform (M1 step 2). See ADRs 0013, 0015-0018.
+# Local streaming platform (M1 steps 2-3). See ADRs 0013, 0015-0018, 0020.
 #
 #   Flink SQL jobs ──► Kafka topics ──► materialization job (Flink SQL, pure copy) ──► Iceberg tables
-#                                                                                        │
-#                                    Iceberg REST catalog (table registry) · RustFS (S3: data files)
+#                          │                                                             │
+#        Schema Registry (Avro schemas)      Iceberg REST catalog (table registry) · RustFS (S3: data files)
 #
-# Host ports: Kafka 9092 · RustFS S3 9000, console 9001 · Iceberg REST 8181 · Flink UI 8081
+# Host ports: Kafka 9092 · Schema Registry 8085 · RustFS S3 9000, console 9001 · Iceberg REST 8181
+#             · Flink UI 8081
 
 x-s3-credentials: &s3-credentials
   AWS_ACCESS_KEY_ID: ${S3_ACCESS_KEY:-asm-local}
@@ -40,6 +41,35 @@ services:
       interval: 5s
       timeout: 10s
       retries: 20
+      start_period: 10s
+
+  # Confluent Schema Registry (ADR 0020): stores the Avro schemas of every topic's keys and
+  # values in the `_schemas` topic. Host port 8085, since Flink's UI already uses 8081.
+  schema-registry:
+    image: confluentinc/cp-schema-registry:8.4.0
+    ports:
+      - "8085:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:19092
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+    depends_on:
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      # The image has no curl: send a minimal HTTP request with bash and expect a 200.
+      test:
+        - CMD
+        - bash
+        - -c
+        - >
+          exec 3<>/dev/tcp/127.0.0.1/8081
+          && printf 'GET /subjects HTTP/1.0\r\n\r\n' >&3
+          && head -1 <&3 | grep -q ' 200 '
+      interval: 5s
+      timeout: 5s
+      retries: 30
       start_period: 10s
 
   rustfs:

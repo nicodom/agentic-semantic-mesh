@@ -1,0 +1,14 @@
+{
+  "type": "record",
+  "name": "InventoryChanged",
+  "namespace": "agentic_mesh.shop",
+  "doc": "Stock of one product changed.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "sku", "type": "string"},
+    {"name": "delta", "type": "int", "doc": "Units added (positive) or removed (negative)."},
+    {"name": "stock_after", "type": "int", "doc": "Units in stock after this change."},
+    {"name": "reason", "type": {"type": "enum", "name": "InventoryChangeReason", "symbols": ["order", "return", "restock"]}}
+  ]
+}

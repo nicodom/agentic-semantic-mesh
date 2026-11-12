@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "CheckoutStarted",
+  "namespace": "agentic_mesh.shop",
+  "doc": "A customer started checkout; the order is created as pending.",
+  "fields": [
+    {"name": "event_id", "type": "string", "doc": "Unique identifier of this event."},
+    {"name": "event_time", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "When it happened (UTC). Also the Kafka record timestamp."},
+    {"name": "session_id", "type": "string", "doc": "A customer's shopping session, from the first cart change to checkout; at most one order per session."},
+    {"name": "order_id", "type": "string", "doc": "The pending order; shared by every payment attempt and the placed order."},
+    {"name": "customer_id", "type": "string"},
+    {"name": "cart_value", "type": {"type": "bytes", "logicalType": "decimal", "precision": 10, "scale": 2}, "doc": "Total value of the cart, EUR."},
+    {"name": "item_count", "type": "int", "doc": "Total units in the cart."}
+  ]
+}

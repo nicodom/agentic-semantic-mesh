@@ -32,9 +32,10 @@ Each step ends with something runnable and a commit.
 
 ### 3. Event generator with ground truth
 
-- Event types: `cart_updated`, `checkout_started`, `order_placed`, `payment_attempted`, `inventory_changed`, `return_requested` → **ADR** on schema format (JSON Schema vs Avro with a schema registry)
+- Event types: `cart_updated`, `checkout_started`, `order_placed`, `payment_attempted`, `inventory_changed`, `return_requested`, one topic each; Avro keys and values in Confluent Schema Registry → [ADR 0020](../adr/0020-avro-with-confluent-schema-registry.md)
+- A custom Python generator with event time, a live mode and a seeded backfill mode → [ADR 0021](../adr/0021-python-event-generator-with-event-time.md) (Datagen connector and ShadowTraffic considered)
 - Steady-state traffic plus injectable scenarios, starting with *payment-provider outage*: payment failures rise, checkout conversion drops
-- The generator writes a ground-truth log (what was injected, when, expected effect) used by the evals
+- The generator writes a ground-truth log (what was injected, when, and the exact resulting counts) used by the evals and to check the Flink jobs
 
 ### 4. Flink SQL jobs
 
