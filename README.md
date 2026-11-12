@@ -15,6 +15,10 @@ The system has two agent modes over one event platform:
 - **Assistant:** answers questions about what is happening in the business right now ("why did checkout conversion drop in the last 10 minutes?").
 - **Agentic workflow:** when the stream processor detects an anomaly, an agent plans an investigation, gathers evidence through tools, has its diagnosis critiqued by a second model, and proposes an action. A policy outside the model decides what happens next: low-risk, reversible actions within limits run automatically and are reported; high-impact actions wait for a human to approve them.
 
+![How the agentic workflow runs: e-commerce events stream in and are aggregated into live metrics; when conversion drops, an agent investigates through data products, a second model challenges the diagnosis, and the agent proposes an action. A policy, not the model, decides: low-risk actions run and are reported, high-impact actions wait for a human to approve or reject them.](docs/images/overview.png)
+
+*The agentic workflow, the target of milestone M3.*
+
 ## Target architecture
 
 ```
