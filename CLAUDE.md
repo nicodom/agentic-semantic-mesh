@@ -24,6 +24,10 @@ The owner is an engineering leader using this project to build hands-on depth in
 - LLM access only through the provider interface (Claude, OpenAI, local via Ollama). Default to the local model for development runs.
 - Secrets live in `.env` (gitignored); `.env.example` lists every variable with no values.
 
+## Work tracking
+
+Work is tracked in GitHub (ADR 0022): milestones M1–M4, one issue per plan step with a task checklist, and issues labelled `open-question`, `later`, `decision-needed` or `owner-task` for loose ends, on the [project board](https://github.com/users/nicodom/projects/1). A step's pull request says "Closes #N"; tick the issue's checklist as work lands and move its card (Next → In progress → Done). New loose ends become issues, not TODOs in docs.
+
 ## Cost
 
 Paid LLM APIs are capped at EUR 50/month (ADR 0012). Before running anything that calls a paid model in a loop or over a full eval suite, state the expected number of calls and roughly what they cost, and use the local model unless the run is a deliberate comparison.
