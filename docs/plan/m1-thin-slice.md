@@ -4,6 +4,8 @@
 
 **Done when:** `docker compose up` plus one command runs the whole slice, the eval suite passes on at least one provider, the results compare all three, and every decision taken along the way has an ADR.
 
+**Progress:** [milestone M1](https://github.com/nicodom/agentic-semantic-mesh/milestone/1) and the [project board](https://github.com/users/nicodom/projects/1); each step below links to its issue, which holds the task checklist ([ADR 0022](../adr/0022-github-issues-for-work-tracking.md)).
+
 **Deliberately not in M1:** data products and descriptors, MCP, retrieval, Neo4j, Temporal, guardrails. M1 uses raw tools, so M2 has a baseline to beat.
 
 ## Steps
@@ -12,6 +14,8 @@ Each step ends with something runnable and a commit.
 
 ### 0. Toolchain
 
+Issue: [#7](https://github.com/nicodom/agentic-semantic-mesh/issues/7)
+
 - Container runtime for Docker Compose → **ADR** (OrbStack, Docker Desktop or Colima)
 - `uv` for Python
 - Ollama and a local model that supports tool calling → **ADR** (which model, and why)
@@ -19,11 +23,15 @@ Each step ends with something runnable and a commit.
 
 ### 1. Repo skeleton
 
+Issue: [#7](https://github.com/nicodom/agentic-semantic-mesh/issues/7)
+
 - `uv` project, Python 3.12+, `ruff`, `pytest`
 - `.env.example`, `Makefile` (or `justfile`) with `up`, `down`, `demo`, `eval`
 - GitHub Actions: lint and unit tests
 
 ### 2. Streaming platform in Compose
+
+Issue: [#8](https://github.com/nicodom/agentic-semantic-mesh/issues/8)
 
 - Kafka (single broker, KRaft) → [ADR 0015](../adr/0015-apache-kafka-kraft.md)
 - Flink 2.2 (JobManager, TaskManager, SQL client), the newest version the Kafka connector supports → [ADR 0016](../adr/0016-reference-iceberg-rest-catalog.md)
@@ -32,12 +40,16 @@ Each step ends with something runnable and a commit.
 
 ### 3. Event generator with ground truth
 
+Issue: [#9](https://github.com/nicodom/agentic-semantic-mesh/issues/9)
+
 - Event types: `cart_updated`, `checkout_started`, `order_placed`, `payment_attempted`, `inventory_changed`, `return_requested`, one topic each; Avro keys and values in Confluent Schema Registry → [ADR 0020](../adr/0020-avro-with-confluent-schema-registry.md)
 - A custom Python generator with event time, a live mode and a seeded backfill mode → [ADR 0021](../adr/0021-python-event-generator-with-event-time.md) (Datagen connector and ShadowTraffic considered)
 - Steady-state traffic plus injectable scenarios, starting with *payment-provider outage*: payment failures rise, checkout conversion drops
 - The generator writes a ground-truth log (what was injected, when, and the exact resulting counts) used by the evals and to check the Flink jobs
 
 ### 4. Flink SQL jobs
+
+Issue: [#10](https://github.com/nicodom/agentic-semantic-mesh/issues/10)
 
 - Kafka source tables for each event type
 - Tumbling windows: orders per minute, checkout conversion (5 min), payment failure rate by provider (5 min)
@@ -46,11 +58,15 @@ Each step ends with something runnable and a commit.
 
 ### 5. Provider interface
 
+Issue: [#11](https://github.com/nicodom/agentic-semantic-mesh/issues/11)
+
 - One interface: messages, tool definitions, tool calls, token usage
 - Adapters: Claude, OpenAI, Ollama; normalise tool-calling differences
 - Unit tests with recorded responses (no paid calls in CI)
 
 ### 6. Assistant agent with raw tools
+
+Issue: [#12](https://github.com/nicodom/agentic-semantic-mesh/issues/12)
 
 - Tools: query Iceberg tables → **ADR** on the query engine (DuckDB with PyIceberg vs Trino), and read the latest metrics from Kafka
 - An agent loop written directly against the interface (no framework)
@@ -58,16 +74,22 @@ Each step ends with something runnable and a commit.
 
 ### 7. Observability
 
+Issue: [#13](https://github.com/nicodom/agentic-semantic-mesh/issues/13)
+
 - Langfuse in Compose
 - OpenTelemetry instrumentation with GenAI semantic conventions: one trace per question, a span per LLM call and per tool call, token counts and cost
 
 ### 8. Evals
+
+Issue: [#14](https://github.com/nicodom/agentic-semantic-mesh/issues/14)
 
 - About 10 cases as data, expected answers derived from the ground-truth log
 - `pytest` harness: exact checks for numbers and timestamps, an LLM judge only where wording varies
 - One run per provider; a results table with accuracy, latency and cost per answer; scores pushed to Langfuse
 
 ### 9. Close M1
+
+Issue: [#15](https://github.com/nicodom/agentic-semantic-mesh/issues/15)
 
 - README "Run it" section and a short demo script
 - M1 retrospective (`docs/retros/m1.md`): what worked, what surprised, what M2 must fix

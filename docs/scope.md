@@ -29,11 +29,11 @@ Conventions: MIT licence, Python managed with `uv`, CI on GitHub Actions running
 
 - Production deployment, multi-user auth, a UI beyond what a demo needs.
 - Agent frameworks (LangChain, LangGraph, CrewAI): the point is to understand the mechanics.
-- Formal proofs over the ontology. Open question for M2: whether to model the semantic mesh as an OWL/SHACL ontology (e.g. with [open-ontologies](https://github.com/fabio-rovai/open-ontologies)) projected into Neo4j. To be decided in an ADR at the start of M2.
+- Formal proofs over the ontology. Open question for M2: whether to model the semantic mesh as an OWL/SHACL ontology (e.g. with [open-ontologies](https://github.com/fabio-rovai/open-ontologies)) projected into Neo4j. To be decided in an ADR at the start of M2 ([#19](https://github.com/nicodom/agentic-semantic-mesh/issues/19)).
 
 ## Later
 
-- Graphify (codebase knowledge graph) around M3, with a measured before/after token comparison.
-- A Confluent Cloud deployment profile, with Tableflow replacing the local materialization job ([ADR 0018](adr/0018-kafka-topics-first-iceberg-materialization.md)).
-- A measured comparison of three topic-to-Iceberg materializers on the same topics: the Flink SQL job, Iceberg's Kafka Connect sink, and Tableflow.
-- Anomaly detection by an agent instead of fixed rules in Flink SQL, or a hybrid where Flink flags candidates cheaply and an agent decides which are real. Measured against the generator's ground truth: precision and recall on injected anomalies, detection latency, and LLM cost per hour of traffic.
+- Graphify (codebase knowledge graph) around M3, with a measured before/after token comparison. ([#21](https://github.com/nicodom/agentic-semantic-mesh/issues/21))
+- A Confluent Cloud deployment profile, with Tableflow replacing the local materialization job ([ADR 0018](adr/0018-kafka-topics-first-iceberg-materialization.md)). ([#22](https://github.com/nicodom/agentic-semantic-mesh/issues/22))
+- A measured comparison of three topic-to-Iceberg materializers on the same topics: the Flink SQL job, Iceberg's Kafka Connect sink, and Tableflow. ([#23](https://github.com/nicodom/agentic-semantic-mesh/issues/23))
+- Anomaly detection by an agent instead of fixed rules in Flink SQL, or a hybrid where Flink flags candidates cheaply and an agent decides which are real. Measured against the generator's ground truth: precision and recall on injected anomalies, detection latency, and LLM cost per hour of traffic. ([#24](https://github.com/nicodom/agentic-semantic-mesh/issues/24))

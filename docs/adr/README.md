@@ -25,3 +25,4 @@ Format and rules: [0001](0001-record-architecture-decisions.md). Never edit an a
 | 19 | [Risk-tiered autonomy: policy decides which agent actions run automatically](0019-risk-tiered-autonomy.md) | Accepted |
 | 20 | [Avro with Confluent Schema Registry for event serialization](0020-avro-with-confluent-schema-registry.md) | Accepted |
 | 21 | [A custom Python event generator with event time, and live and backfill modes](0021-python-event-generator-with-event-time.md) | Accepted |
+| 22 | [GitHub Issues, Milestones and a Project board to track work](0022-github-issues-for-work-tracking.md) | Accepted |
