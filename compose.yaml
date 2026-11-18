@@ -153,7 +153,8 @@ services:
         jobmanager.rpc.address: jobmanager
         jobmanager.memory.process.size: 1g
         taskmanager.memory.process.size: 2g
-        taskmanager.numberOfTaskSlots: 4
+        # Four long-running jobs take a slot each; the rest run smoke tests alongside them.
+        taskmanager.numberOfTaskSlots: 8
         execution.checkpointing.interval: 10s
         execution.checkpointing.dir: s3://flink/checkpoints
         execution.checkpointing.savepoint-dir: s3://flink/savepoints
