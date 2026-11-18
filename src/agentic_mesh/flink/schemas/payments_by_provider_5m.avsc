@@ -1,0 +1,16 @@
+{
+  "type": "record",
+  "name": "PaymentsByProvider",
+  "namespace": "agentic_mesh.metrics",
+  "doc": "Payment attempts and failures per provider per five-minute tumbling window, by event time. A provider with no attempts in a window has no record.",
+  "fields": [
+    {"name": "window_start", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "Start of the window (UTC, inclusive)."},
+    {"name": "window_end", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "End of the window (UTC, exclusive)."},
+    {"name": "provider", "type": "string", "doc": "Payment provider: stripe, adyen or paypal."},
+    {"name": "attempts", "type": "long", "doc": "Payment attempts with this provider in the window, first attempts and retries."},
+    {"name": "failures", "type": "long", "doc": "Attempts that failed."},
+    {"name": "failure_rate", "type": "double", "doc": "failures / attempts."},
+    {"name": "retries", "type": "long", "doc": "Attempts that were a retry (attempt > 1), possibly after a failure with another provider."},
+    {"name": "retries_succeeded", "type": "long", "doc": "Retries that succeeded."}
+  ]
+}
