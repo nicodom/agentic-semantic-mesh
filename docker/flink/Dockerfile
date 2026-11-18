@@ -11,6 +11,18 @@ ADD --chown=flink:flink \
     ${MAVEN}/org/apache/flink/flink-sql-connector-kafka/5.0.0-2.2/flink-sql-connector-kafka-5.0.0-2.2.jar \
     /opt/flink/lib/
 
+# Avro format that reads and writes Schema Registry framing (`avro-confluent`, ADR 0020).
+ADD --chown=flink:flink \
+    --checksum=sha256:9f37aacbbcf7c7b5dd34dd673b16f83c4f18787337cea8e6378c71a7e7405c9a \
+    ${MAVEN}/org/apache/flink/flink-sql-avro-confluent-registry/2.2.1/flink-sql-avro-confluent-registry-2.2.1.jar \
+    /opt/flink/lib/
+
+# S3 file system for checkpoints and savepoints in RustFS (ADR 0023). It ships in the image's
+# opt/ folder; Flink loads it as a plugin, isolated from the jars in lib/. Presto's is the one
+# Flink recommends for checkpoints.
+RUN mkdir /opt/flink/plugins/s3-fs-presto \
+    && cp /opt/flink/opt/flink-s3-fs-presto-2.2.1.jar /opt/flink/plugins/s3-fs-presto/
+
 # Iceberg catalog and sink, used only by the materialization job (ADR 0018).
 ADD --chown=flink:flink \
     --checksum=sha256:c79bbee8792b1115c321e4be99fab3fb36db0bf8fa2bba24b481e6da14416de3 \
