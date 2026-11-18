@@ -51,10 +51,13 @@ Issue: [#9](https://github.com/nicodom/agentic-semantic-mesh/issues/9)
 
 Issue: [#10](https://github.com/nicodom/agentic-semantic-mesh/issues/10)
 
-- Kafka source tables for each event type
+- Kafka source tables for each event type, with event-time watermarks
 - Tumbling windows: orders per minute, checkout conversion (5 min), payment failure rate by provider (5 min)
-- Sinks: Flink jobs write windowed metrics only to Kafka topics
-- A separate materialization job copies raw-event and metric topics into Iceberg tables, the part Tableflow replaces in a Confluent Cloud profile ([ADR 0018](../adr/0018-kafka-topics-first-iceberg-materialization.md))
+- Sinks: Flink jobs write windowed metrics only to Kafka topics `metrics.orders_1m`, `metrics.checkout_funnel_5m` and `metrics.payments_by_provider_5m`, with Avro schemas kept in the repo ([ADR 0023](../adr/0023-flink-metric-jobs-and-materialization.md))
+- Conversion is per window (orders ÷ checkouts in the same window); abandonment stays in the ground truth only. Cohort conversion and abandonment in Flink are later work ([#27](https://github.com/nicodom/agentic-semantic-mesh/issues/27))
+- Jobs stop with a savepoint and resume from it; checkpoints and savepoints live in RustFS
+- A separate materialization job copies raw-event and metric topics into unpartitioned Iceberg tables with Kafka partition, offset and timestamp columns, the part Tableflow replaces in a Confluent Cloud profile ([ADR 0018](../adr/0018-kafka-topics-first-iceberg-materialization.md)). Compaction is later work ([#28](https://github.com/nicodom/agentic-semantic-mesh/issues/28))
+- Done when the metric topics equal the ground truth window by window on a backfill (a missing window counts as zero), and the Iceberg row counts equal the topic counts
 
 ### 5. Provider interface
 
