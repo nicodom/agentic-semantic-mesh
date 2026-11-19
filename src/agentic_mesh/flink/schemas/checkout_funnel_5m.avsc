@@ -1,0 +1,13 @@
+{
+  "type": "record",
+  "name": "CheckoutFunnel",
+  "namespace": "agentic_mesh.metrics",
+  "doc": "Checkouts started and orders placed per five-minute tumbling window, by event time. Windows with neither have no record.",
+  "fields": [
+    {"name": "window_start", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "Start of the window (UTC, inclusive)."},
+    {"name": "window_end", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "End of the window (UTC, exclusive)."},
+    {"name": "checkouts_started", "type": "long", "doc": "Checkouts started in the window."},
+    {"name": "orders_placed", "type": "long", "doc": "Orders placed in the window."},
+    {"name": "conversion", "type": ["null", "double"], "default": null, "doc": "orders_placed / checkouts_started; null when no checkout started. Per window, not per checkout cohort: an order can fall in the window after its checkout's (ADR 0023)."}
+  ]
+}

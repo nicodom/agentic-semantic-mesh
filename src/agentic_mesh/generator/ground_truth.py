@@ -19,7 +19,8 @@ FUNNEL_WINDOW_MS = 5 * MINUTE
 
 
 def _rate(numerator: int, denominator: int) -> float | None:
-    return round(numerator / denominator, 4) if denominator else None
+    # Unrounded: the same IEEE division as Flink's, so the two compare exactly.
+    return numerator / denominator if denominator else None
 
 
 class GroundTruth:

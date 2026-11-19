@@ -69,10 +69,12 @@ make up smoke          # start the local stack, then check data flows through it
 | `make test` | Unit tests: no LLM calls, no running stack |
 | `make up` / `make down` | Start the local stack and wait until healthy / stop it, keeping data |
 | `make clean` | Stop the stack and delete its data |
-| `make smoke` | Smoke tests against the running stack: Kafka, Iceberg, topic → Flink → Iceberg, and the event generator |
+| `make smoke` | Smoke tests against the running stack: Kafka, Iceberg, topic → Flink → Iceberg, the event generator, and the Flink jobs against the ground truth |
 | `make backfill` | Generate the last 2 hours of shop events into Kafka (seed 42), with a payment-provider outage halfway |
 | `make generate` | Generate events live until Ctrl-C, with an outage after 5 minutes |
 | `make peek TOPIC=…` | Show the latest events of a topic, decoded from Avro |
+| `make jobs` / `make jobs-stop` | Start the Flink jobs, each from its last savepoint / stop them, each with a savepoint |
+| `make jobs-status` | Show which Flink jobs are running |
 | `make demo` | End-to-end demo (from M1 step 9) |
 | `make eval` | Agent eval suite (from M1 step 8) |
 
@@ -102,6 +104,20 @@ The generator ([ADR 0021](docs/adr/0021-python-event-generator-with-event-time.m
 A session is one customer's visit, from the first cart change to checkout, with at most one order. Keys are partitioning keys, not primary keys: all events of a session share a partition and stay in order. The topics are append-only. The schemas, with a description of every field, are in [`src/agentic_mesh/generator/schemas/`](src/agentic_mesh/generator/schemas/).
 
 Each run writes its ground truth to `data/local/ground-truth/` as JSONL: the run's parameters and scenarios, then exact counts per epoch-aligned window (orders per minute; checkouts, orders, conversion and abandonment per 5 minutes; payment attempts, failures and retries by provider per 5 minutes). The evals and the Flink jobs are checked against these numbers. A backfill with the same `--seed` and `--end` produces identical events.
+
+### Metrics and the lake
+
+Flink SQL jobs ([ADRs 0018](docs/adr/0018-kafka-topics-first-iceberg-materialization.md) and [0023](docs/adr/0023-flink-metric-jobs-and-materialization.md)) turn the events into windowed metrics, by event time, each written to its own topic:
+
+| Topic | Key | One record per |
+|---|---|---|
+| `metrics.orders_1m` | `window_start` | Minute: orders placed |
+| `metrics.checkout_funnel_5m` | `window_start` | 5 minutes: checkouts started, orders placed, and conversion (orders ÷ checkouts in the same window) |
+| `metrics.payments_by_provider_5m` | `window_start`, `provider` | 5 minutes and provider: attempts, failures, failure rate, retries and retries that succeeded |
+
+A window with no events has no record. After a crash a job may write a window again; the key identifies it. Their schemas are in [`src/agentic_mesh/flink/schemas/`](src/agentic_mesh/flink/schemas/), and the queries in [`src/agentic_mesh/flink/sql/`](src/agentic_mesh/flink/sql/).
+
+A materialization job copies every event and metric topic into Iceberg tables, `lake.shop.*` and `lake.metrics.*`, adding each record's Kafka partition, offset and timestamp. To run it all: `make backfill jobs`, then `make generate` to keep it flowing. `make jobs-stop` stops the jobs with savepoints in RustFS, so windows still open carry on at the next `make jobs`.
 
 ## Decisions
 

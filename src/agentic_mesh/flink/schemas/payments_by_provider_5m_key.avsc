@@ -1,0 +1,10 @@
+{
+  "type": "record",
+  "name": "PaymentsByProviderKey",
+  "namespace": "agentic_mesh.metrics",
+  "doc": "Kafka record key of metrics.payments_by_provider_5m: the window and provider. The identity of a row; a repeated row (possible after a crash, ADR 0023) carries the same counts.",
+  "fields": [
+    {"name": "window_start", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "Start of the five-minute window (UTC, inclusive)."},
+    {"name": "provider", "type": "string", "doc": "Payment provider: stripe, adyen or paypal."}
+  ]
+}
