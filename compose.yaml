@@ -121,7 +121,14 @@ services:
         condition: service_completed_successfully
     environment:
       <<: *s3-credentials
-      CATALOG_URI: jdbc:sqlite:/home/iceberg/iceberg.db
+      CATALOG_URI: jdbc:sqlite:/home/iceberg/iceberg.db?busy_timeout=5000
+      # One connection. SQLite has one writer at a time, and the materialization job commits
+      # all its tables at once on every checkpoint. With more connections, a commit sent on a
+      # connection whose earlier read is still open fails at once with SQLITE_BUSY (SQLite does
+      # not let it wait, to avoid deadlocks), and in rollback-journal mode that open read blocks
+      # every later write until the catalog restarts. With one, commits simply take turns.
+      # The busy timeout only covers other processes, such as the sqlite3 CLI, opening the file.
+      CATALOG_CLIENTS: 1
       CATALOG_JDBC_USER: user
       CATALOG_JDBC_PASSWORD: password
       CATALOG_WAREHOUSE: s3://warehouse/
