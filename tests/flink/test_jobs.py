@@ -41,6 +41,7 @@ def test_metric_script_reads_its_sources_and_writes_its_topic() -> None:
     sql = jobs.metric_script(job, Stack(topic_prefix="t.", bounded=True), "s3://flink/sp-1")
     assert "SET 'execution.state-recovery.path' = 's3://flink/sp-1';" in sql
     assert "SET 'table.dml-sync' = 'true';" in sql
+    assert "SET 'restart-strategy.type' = 'none';" in sql
     assert "'topic' = 't.shop.checkout_started'" in sql
     assert "'topic' = 't.shop.order_placed'" in sql
     assert "'topic' = 't.metrics.checkout_funnel_5m'" in sql
@@ -54,6 +55,7 @@ def test_schemas_are_inlined_as_sql_literals() -> None:
     assert "customer''s" in sql
     assert "scan.bounded.mode" not in sql
     assert "SET 'table.dml-sync' = 'false';" in sql
+    assert "restart-strategy" not in sql
 
 
 def test_only_event_topics_get_watermarks() -> None:

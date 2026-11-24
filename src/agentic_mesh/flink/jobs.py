@@ -79,6 +79,9 @@ def _settings(job_name: str, stack: Stack, restore_from: str | None) -> list[str
         # left running.
         "table.dml-sync": "true" if stack.bounded else "false",
     }
+    if stack.bounded:
+        # Fail instead of restarting, so an error ends the run rather than looping forever.
+        settings["restart-strategy.type"] = "none"
     if restore_from:
         settings["execution.state-recovery.path"] = restore_from
     return [f"SET '{k}' = '{v}';" for k, v in settings.items()]
