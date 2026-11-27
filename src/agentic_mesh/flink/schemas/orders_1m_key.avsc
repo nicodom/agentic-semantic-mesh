@@ -1,0 +1,9 @@
+{
+  "type": "record",
+  "name": "OrdersPerMinuteKey",
+  "namespace": "agentic_mesh.metrics",
+  "doc": "Kafka record key of metrics.orders_1m: the window. The identity of a row; a repeated window (possible after a crash, ADR 0023) carries the same counts.",
+  "fields": [
+    {"name": "window_start", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "Start of the one-minute window (UTC, inclusive)."}
+  ]
+}

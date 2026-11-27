@@ -1,0 +1,11 @@
+{
+  "type": "record",
+  "name": "OrdersPerMinute",
+  "namespace": "agentic_mesh.metrics",
+  "doc": "Orders placed per one-minute tumbling window, by event time. Windows with no orders have no record.",
+  "fields": [
+    {"name": "window_start", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "Start of the window (UTC, inclusive)."},
+    {"name": "window_end", "type": {"type": "long", "logicalType": "timestamp-millis"}, "doc": "End of the window (UTC, exclusive)."},
+    {"name": "orders", "type": "long", "doc": "Orders placed in the window."}
+  ]
+}

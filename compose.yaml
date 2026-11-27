@@ -1,4 +1,4 @@
-# Local streaming platform (M1 steps 2-3). See ADRs 0013, 0015-0018, 0020.
+# Local streaming platform (M1 steps 2-4). See ADRs 0013, 0015-0018, 0020, 0023.
 #
 #   Flink SQL jobs ──► Kafka topics ──► materialization job (Flink SQL, pure copy) ──► Iceberg tables
 #                          │                                                             │
@@ -93,7 +93,8 @@ services:
       retries: 20
       start_period: 5s
 
-  # One-shot: create the bucket that holds the Iceberg warehouse.
+  # One-shot: create the buckets for the Iceberg warehouse and for Flink's checkpoints and
+  # savepoints (ADR 0023).
   rustfs-init:
     image: amazon/aws-cli:2.39.6
     depends_on:
@@ -104,8 +105,10 @@ services:
     entrypoint: ["sh", "-c"]
     command:
       - >
-        aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket warehouse 2>/dev/null
-        || aws --endpoint-url http://rustfs:9000 s3 mb s3://warehouse
+        for b in warehouse flink; do
+        aws --endpoint-url http://rustfs:9000 s3api head-bucket --bucket $$b 2>/dev/null
+        || aws --endpoint-url http://rustfs:9000 s3 mb s3://$$b || exit 1;
+        done
     restart: "no"
 
   # Apache's reference Iceberg REST catalog (ADR 0016). Table registry kept in SQLite on a volume.
@@ -118,7 +121,14 @@ services:
         condition: service_completed_successfully
     environment:
       <<: *s3-credentials
-      CATALOG_URI: jdbc:sqlite:/home/iceberg/iceberg.db
+      CATALOG_URI: jdbc:sqlite:/home/iceberg/iceberg.db?busy_timeout=5000
+      # One connection. SQLite has one writer at a time, and the materialization job commits
+      # all its tables at once on every checkpoint. With more connections, a commit sent on a
+      # connection whose earlier read is still open fails at once with SQLITE_BUSY (SQLite does
+      # not let it wait, to avoid deadlocks), and in rollback-journal mode that open read blocks
+      # every later write until the catalog restarts. With one, commits simply take turns.
+      # The busy timeout only covers other processes, such as the sqlite3 CLI, opening the file.
+      CATALOG_CLIENTS: 1
       CATALOG_JDBC_USER: user
       CATALOG_JDBC_PASSWORD: password
       CATALOG_WAREHOUSE: s3://warehouse/
@@ -150,10 +160,21 @@ services:
         jobmanager.rpc.address: jobmanager
         jobmanager.memory.process.size: 1g
         taskmanager.memory.process.size: 2g
-        taskmanager.numberOfTaskSlots: 4
+        # Four long-running jobs take a slot each; the rest run smoke tests alongside them.
+        taskmanager.numberOfTaskSlots: 8
         execution.checkpointing.interval: 10s
+        execution.checkpointing.dir: s3://flink/checkpoints
+        execution.checkpointing.savepoint-dir: s3://flink/savepoints
+        s3.endpoint: http://rustfs:9000
+        s3.path.style.access: true
+        s3.access-key: ${S3_ACCESS_KEY:-asm-local}
+        s3.secret-key: ${S3_SECRET_KEY:-asm-local-secret}
     depends_on:
+      rustfs-init:
+        condition: service_completed_successfully
       kafka:
+        condition: service_healthy
+      schema-registry:
         condition: service_healthy
       iceberg-rest:
         condition: service_healthy
